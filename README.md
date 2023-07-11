@@ -3,4 +3,4 @@
 Simplified CSV library for use in future projects.
 
 ## TODO:
-- everything
+- Test the hell out of this thing!

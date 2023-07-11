@@ -1,9 +1,10 @@
 pub enum Error {
     UnableToParse,
     FileNotFound,
-    FilePath,
+    FileRead,
     CreateFile,
     Write,
     Append,
     DataNotFound,
+    IncorrectFileType,
 }
