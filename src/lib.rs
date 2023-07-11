@@ -142,11 +142,10 @@ fn records_to_string(records: &Vec<Record>) -> String {
         let mut record_string = String::new();
         for item in record {
             record_string.push_str(item);
-            record_string.push_str(", ");
+            record_string.push_str(",");
         }
 
-        // removes the last ", "
-        record_string.pop();
+        // removes the last ","
         record_string.pop();
         record_string.push_str("\n");
         combined_records.push(record_string);
@@ -193,5 +192,30 @@ mod tests {
     #[should_panic]
     fn csv_new_no_data_panic() {
         let _csv = CSV::new("test");
+    }
+
+    #[test]
+    fn helper_records_to_string() {
+        let records: Vec<Record> = vec![
+            vec![String::from("one"), String::from("two"), String::from("three")],
+            vec![String::from("four"), String::from("five"), String::from("six")],
+            vec![String::from("seven"), String::from("eight"), String::from("nine")],
+        ];
+
+        let result = records_to_string(&records);
+        assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine\n"), result);
+    }
+
+    #[test]
+    fn helper_raw_csv_to_records() {
+        let expected: Vec<Record> = vec![
+            vec![String::from("one"), String::from("two"), String::from("three")],
+            vec![String::from("four"), String::from("five"), String::from("six")],
+            vec![String::from("seven"), String::from("eight"), String::from("nine")],
+        ];
+        let csv_string = String::from("one,two,three\nfour,five,six\nseven,eight,nine");
+
+        let result = raw_csv_to_records(&csv_string).unwrap_or(vec![vec!["FAIL".to_string()]]);
+        assert_eq!(expected, result);
     }
 }
