@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use std::{fs, str};
+use std::{fs, str, collections::HashMap};
 
 pub mod errors;
+mod utils;
 
 /// The CSV struct is used to store and manipulate date within memory
 /// before saving/writing to an external file
@@ -25,7 +25,7 @@ impl<'a> CSV<'a> {
     
     /// Creates a blank CSV Instance with a desired file path
     pub fn new(path: &str) -> CSV {
-        path_validate(path);
+        utils::path_validate(path);
         CSV {
             path,
             data: Vec::new(),
@@ -34,7 +34,7 @@ impl<'a> CSV<'a> {
     }
 
     pub fn new_with_data(path: &str, data: Vec<Record>) -> CSV {
-        path_validate(path);
+        utils::path_validate(path);
         CSV {
             path,
             data,
@@ -53,7 +53,7 @@ impl<'a> CSV<'a> {
             Err(_) => return Err(errors::Error::FileRead),
         };
 
-        let data = raw_csv_to_records(&file_data)?;
+        let data = utils::raw_csv_to_records(&file_data)?;
 
         Ok(CSV {
             path,
@@ -104,7 +104,7 @@ impl<'a> CSV<'a> {
     }
 
     pub fn save(&mut self) -> Result<(), errors::Error> {
-        let temp_data = records_to_string(&self.data);
+        let temp_data = utils::records_to_string(&self.data);
 
         if let Err(_) = fs::write(&self.path, temp_data) {
             return Err(errors::Error::Write);
@@ -116,49 +116,6 @@ impl<'a> CSV<'a> {
 
 }
 
-
-fn raw_csv_to_records(raw: &String) -> Result<Vec<Record>, errors::Error> {
-    if !raw.contains(",") || !raw.contains("\n") {
-        return Err(errors::Error::UnableToParse);
-    }
-
-    let mut data: Vec<Record> = Vec::new();
-
-    for line in raw.lines() {
-        let record: Record = line.split(',')
-                                .into_iter()
-                                .map(|item| item.to_string())
-                                .collect();
-        data.push(record);
-    }
-    Ok(data)
-}
-
-fn records_to_string(records: &Vec<Record>) -> String {
-    let mut combined_records: Vec<String> = Vec::new();
-
-    for record in records {
-        let mut record_string = String::new();
-        for item in record {
-            record_string.push_str(item);
-            record_string.push_str(",");
-        }
-
-        // removes the last ","
-        record_string.pop();
-        record_string.push_str("\n");
-        combined_records.push(record_string);
-    }
-
-    combined_records.into_iter().collect::<String>()
-}
-
-
-fn path_validate(path: &str) {
-    if !path.ends_with(".csv") {
-        panic!("Path does not point to a CSV file. Please check your CSV instance...")
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -193,40 +150,4 @@ mod tests {
         let _csv = CSV::new("test");
     }
 
-    #[test]
-    fn helper_records_to_string() {
-        let records: Vec<Record> = vec![
-            vec![String::from("one"), String::from("two"), String::from("three")],
-            vec![String::from("four"), String::from("five"), String::from("six")],
-            vec![String::from("seven"), String::from("eight"), String::from("nine")],
-        ];
-
-        let result = records_to_string(&records);
-        assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine\n"), result);
-    }
-
-    #[test]
-    fn helper_records_to_string_with_blanks() {
-        let records: Vec<Record> = vec![
-            vec![String::from("one"), "".to_string(), String::from("three")],
-            vec![String::from("four"), String::from("five"), String::from("six")],
-            vec![String::from("seven"), String::from("eight"), String::from("nine")],
-        ];
-
-        let result = records_to_string(&records);
-        assert_eq!(String::from("one,,three\nfour,five,six\nseven,eight,nine\n"), result);
-    }
-
-    #[test]
-    fn helper_raw_csv_to_records() {
-        let expected: Vec<Record> = vec![
-            vec![String::from("one"), String::from("two"), String::from("three")],
-            vec![String::from("four"), String::from("five"), String::from("six")],
-            vec![String::from("seven"), String::from("eight"), String::from("nine")],
-        ];
-        let csv_string = String::from("one,two,three\nfour,five,six\nseven,eight,nine");
-
-        let result = raw_csv_to_records(&csv_string).unwrap_or(vec![vec!["FAIL".to_string()]]);
-        assert_eq!(expected, result);
-    }
 }
