@@ -124,8 +124,7 @@ fn raw_csv_to_records(raw: &String) -> Result<Vec<Record>, errors::Error> {
 
     let mut data: Vec<Record> = Vec::new();
 
-    let lines: Vec<&str> = raw.split("\n").collect();
-    for line in lines {
+    for line in raw.lines() {
         let record: Record = line.split(',')
                                 .into_iter()
                                 .map(|item| item.to_string())
@@ -204,6 +203,18 @@ mod tests {
 
         let result = records_to_string(&records);
         assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine\n"), result);
+    }
+
+    #[test]
+    fn helper_records_to_string_with_blanks() {
+        let records: Vec<Record> = vec![
+            vec![String::from("one"), "".to_string(), String::from("three")],
+            vec![String::from("four"), String::from("five"), String::from("six")],
+            vec![String::from("seven"), String::from("eight"), String::from("nine")],
+        ];
+
+        let result = records_to_string(&records);
+        assert_eq!(String::from("one,,three\nfour,five,six\nseven,eight,nine\n"), result);
     }
 
     #[test]
