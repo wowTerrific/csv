@@ -104,7 +104,7 @@ impl<'a> CSV<'a> {
         Ok(map)
     }
 
-    /// List the number of records, limited by 
+    /// List the number of records including the header, limited by 
     /// [std::usize::MAX](https://doc.rust-lang.org/std/usize/constant.MAX.html).
     pub fn len(&self) -> usize {
         self.data.len()
@@ -143,6 +143,7 @@ impl<'a> CSV<'a> {
 }
 
 
+// Testing CSV files is in done within ./tests/ directory
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -150,17 +151,6 @@ mod tests {
     #[test]
     fn record_test_type() {
         let _record: Record = vec!["one".to_string(), "two".to_string()];
-        assert!(true);
-    }
-
-    #[test]
-    fn csv_manual_build_test() {
-        let record: Record = vec!["one".to_string(), "two".to_string()];
-        let _csv = CSV {
-            path: "test.csv",
-            data: vec![record],
-            state: SaveState::Unsaved,
-        };
         assert!(true);
     }
 
@@ -174,6 +164,75 @@ mod tests {
     #[should_panic]
     fn csv_new_no_data_panic() {
         let _csv = CSV::new("test");
+    }
+
+    #[test]
+    fn csv_new_with_data() {
+        let data: Vec<Record> = vec![
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+            vec![String::from("Value 1"), String::from("Value 2"), String::from("Value 3")],
+            vec![String::from("Value 4"), String::from("Value 5"), String::from("Value 6")],
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+        ];
+
+        let _csv = CSV::new_with_data("test.csv", data);
+
+        assert!(true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn csv_new_with_data_panic() {
+        let data: Vec<Record> = vec![
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+            vec![String::from("Value 1"), String::from("Value 2"), String::from("Value 3")],
+            vec![String::from("Value 4"), String::from("Value 5"), String::from("Value 6")],
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+        ];
+
+        let _csv = CSV::new_with_data("test.abc", data);
+    }
+
+    #[test]
+    fn test_check_state() {
+        let csv = CSV::new("test.csv");
+        assert!(match csv.check_state() {
+            SaveState::Saved => false,
+            SaveState::Unsaved => true,
+        });
+    }
+
+    #[test]
+    fn test_get_record_methods() {
+        let data: Vec<Record> = vec![
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+            vec![String::from("Value 1"), String::from("Value 2"), String::from("Value 3")],
+            vec![String::from("Value 4"), String::from("Value 5"), String::from("Value 6")],
+            vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")],
+        ];
+
+        let csv = CSV::new_with_data("test.csv", data);
+
+        if let Ok(header_data) = csv.get_headers() {
+            assert_eq!(header_data.get(&0), Some(&&"Header 1".to_string()));
+            assert_eq!(header_data.get(&1), Some(&&"Header 2".to_string()));
+            assert_eq!(header_data.get(&2), Some(&&"Header 3".to_string()));
+        } else {
+            assert!(false, "failed to get header data");
+        }
+        
+
+        if let Ok(record) = csv.get_last_record() {
+            let expected = vec![String::from("Header 1"), String::from("Header 2"), String::from("Header 3")];
+            assert_eq!(expected[0], record[0]);
+            assert_eq!(expected[1], record[1]);
+            assert_eq!(expected[2], record[2]);
+        } else {
+            assert!(false, "failed to get last record")
+        }
+        let length = csv.len();
+        assert_eq!(4, length);
+        
     }
 
 }

@@ -33,7 +33,9 @@ pub fn records_to_string(records: &Vec<Record>) -> String {
         combined_records.push(record_string);
     }
 
-    combined_records.into_iter().collect::<String>()
+    let mut result_string = combined_records.into_iter().collect::<String>();
+    result_string.pop(); // removes last "\n" character
+    result_string
 }
 
 
@@ -58,7 +60,7 @@ mod tests {
         ];
 
         let result = records_to_string(&records);
-        assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine\n"), result);
+        assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine"), result);
     }
 
     #[test]
@@ -70,7 +72,7 @@ mod tests {
         ];
 
         let result = records_to_string(&records);
-        assert_eq!(String::from("one,,three\nfour,five,six\nseven,eight,nine\n"), result);
+        assert_eq!(String::from("one,,three\nfour,five,six\nseven,eight,nine"), result);
     }
 
     #[test]
