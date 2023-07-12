@@ -1,6 +1,10 @@
 # CSV
+Simplified CSV library to create and update CSV files. 
 
-Simplified CSV library for use in future projects.
+## Objective
+Zero dependencies outside of the std library.
 
 ## TODO:
-- Test the hell out of this thing!
+- Finish unit tests and integration tests
+- Finish Docs and README
+- Send it, bro

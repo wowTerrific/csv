@@ -235,4 +235,19 @@ mod tests {
         
     }
 
+    #[test]
+    fn test_insert_one() {
+        assert!(false);
+    }
+
+    #[test]
+    fn test_insert_multiple() {
+        assert!(false);
+    }
+
+    #[test]
+    fn test_get_lengths() {
+        assert!(false);
+    }
+
 }
