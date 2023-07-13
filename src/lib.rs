@@ -85,7 +85,7 @@ impl<'a> CSV<'a> {
 
     pub fn get_last_record(&self) -> Result<&Record, errors::Error> {
         let last_line = &self.data[&self.data.len() - 1];
-        if last_line.len() == 0 {
+        if last_line.is_empty() {
             return Err(errors::Error::DataNotFound);
         }
         Ok(last_line)
@@ -94,11 +94,11 @@ impl<'a> CSV<'a> {
     /// Retreive the first line of the CSV instance. 
     pub fn get_headers(&self) -> Result<HashMap<usize, &String>, errors::Error> {
         let first_line = &self.data[0];
-        if first_line.len() == 0 {
+        if first_line.is_empty() {
             return Err(errors::Error::DataNotFound);
         }
         let mut map: HashMap<usize, &String> = HashMap::new();
-        for (i, v) in first_line.into_iter().enumerate() {
+        for (i, v) in first_line.iter().enumerate() {
             map.insert(i, v);
         }
         Ok(map)
@@ -108,6 +108,14 @@ impl<'a> CSV<'a> {
     /// [std::usize::MAX](https://doc.rust-lang.org/std/usize/constant.MAX.html).
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+
+    /// Checks to see if there are any records in `CSV.data`
+    pub fn is_empty(&self) -> bool {
+        if self.data.is_empty() {
+            return true;
+        }
+        false
     }
 
     /// List the number of fields in the first record, limited by 
@@ -132,12 +140,13 @@ impl<'a> CSV<'a> {
     pub fn save(&mut self) -> Result<(), errors::Error> {
         let temp_data = utils::records_to_string(&self.data);
 
-        if let Err(_) = fs::write(&self.path, temp_data) {
+        if fs::write(self.path, temp_data).is_err() {
             return Err(errors::Error::Write);
-        } else {
-            self.state = SaveState::Saved;
-            return Ok(())
         }
+
+        self.state = SaveState::Saved;
+        Ok(())
+        
     }
 
 }
@@ -236,18 +245,23 @@ mod tests {
     }
 
     #[test]
-    fn test_insert_one() {
-        assert!(false);
+    fn test_inserts_lengths() {
+        let mut csv = CSV::new("test.csv");
+        assert_eq!(csv.len(), 0);
+
+        let single_record: Record = vec![String::from("Head 1"), String::from("Head 2")];
+        csv.insert_one(single_record);
+        assert_eq!(csv.len(), 1);
+        assert_eq!(csv.record_len(), 2);
+
+        let multi_record: Vec<Record> = vec![
+            vec![String::from("Value 1"), String::from("Value 2")],
+            vec![String::from("Value 4"), String::from("Value 5")],
+            vec![String::from("Header 1"), String::from("Header 2")],
+        ];
+        csv.insert_multi(multi_record);
+        assert_eq!(csv.len(), 4);
     }
 
-    #[test]
-    fn test_insert_multiple() {
-        assert!(false);
-    }
-
-    #[test]
-    fn test_get_lengths() {
-        assert!(false);
-    }
 
 }

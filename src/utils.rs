@@ -1,7 +1,7 @@
 use super::{Record, errors};
 
-pub fn raw_csv_to_records(raw: &String) -> Result<Vec<Record>, errors::Error> {
-    if !raw.contains(",") || !raw.contains("\n") {
+pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>, errors::Error> {
+    if !raw.contains(',') || !raw.contains('\n') {
         return Err(errors::Error::UnableToParse);
     }
 
@@ -9,7 +9,6 @@ pub fn raw_csv_to_records(raw: &String) -> Result<Vec<Record>, errors::Error> {
 
     for line in raw.lines() {
         let record: Record = line.split(',')
-                                .into_iter()
                                 .map(|item| item.to_string())
                                 .collect();
         data.push(record);
@@ -24,12 +23,12 @@ pub fn records_to_string(records: &Vec<Record>) -> String {
         let mut record_string = String::new();
         for item in record {
             record_string.push_str(item);
-            record_string.push_str(",");
+            record_string.push(',');
         }
 
         // removes the last ","
         record_string.pop();
-        record_string.push_str("\n");
+        record_string.push('\n');
         combined_records.push(record_string);
     }
 
