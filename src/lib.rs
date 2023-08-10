@@ -138,7 +138,21 @@ impl<'a> CSV<'a> {
     /// Create or overwrite an existing CSV file with the data
     /// attached to the CSV instance.
     pub fn save(&mut self) -> Result<(), errors::Error> {
-        let temp_data = utils::records_to_string(&self.data);
+        let temp_data = utils::records_to_string(&self.data, ',');
+
+        if fs::write(self.path, temp_data).is_err() {
+            return Err(errors::Error::Write);
+        }
+
+        self.state = SaveState::Saved;
+        Ok(())
+        
+    }
+
+    /// Create or overwrite an existing CSV file with the data.
+    /// This method accepts a custom delimiter for your CSV
+    pub fn save_custom(&mut self, c: char) -> Result<(), errors::Error> {
+        let temp_data = utils::records_to_string(&self.data, c);
 
         if fs::write(self.path, temp_data).is_err() {
             return Err(errors::Error::Write);

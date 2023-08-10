@@ -16,14 +16,14 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>, errors::Error> {
     Ok(data)
 }
 
-pub fn records_to_string(records: &Vec<Record>) -> String {
+pub fn records_to_string(records: &Vec<Record>, c: char) -> String {
     let mut combined_records: Vec<String> = Vec::new();
 
     for record in records {
         let mut record_string = String::new();
         for item in record {
             record_string.push_str(item);
-            record_string.push(',');
+            record_string.push(c);
         }
 
         // removes the last ","
@@ -58,7 +58,7 @@ mod tests {
             vec![String::from("seven"), String::from("eight"), String::from("nine")],
         ];
 
-        let result = records_to_string(&records);
+        let result = records_to_string(&records, ',');
         assert_eq!(String::from("one,two,three\nfour,five,six\nseven,eight,nine"), result);
     }
 
@@ -70,7 +70,7 @@ mod tests {
             vec![String::from("seven"), String::from("eight"), String::from("nine")],
         ];
 
-        let result = records_to_string(&records);
+        let result = records_to_string(&records, ',');
         assert_eq!(String::from("one,,three\nfour,five,six\nseven,eight,nine"), result);
     }
 
