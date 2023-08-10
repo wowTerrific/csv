@@ -18,6 +18,11 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>, errors::Error> {
 
 pub fn records_to_string(records: &Vec<Record>, c: char) -> String {
     let mut combined_records: Vec<String> = Vec::new();
+    if c != ',' {
+        let separtor_line = format!("sep={}\n", c);
+        combined_records.push(separtor_line);
+    }
+    
 
     for record in records {
         let mut record_string = String::new();

@@ -7,3 +7,7 @@ Any data manipulation will need to be done outside of this crate. CSV is not mea
 
 ## Objective
 Zero dependencies outside of the std library.
+
+## TODO
+- Read a CSV with any type of delimiter
+- Create tests for different delimiter types, should probably restrict the characters used
