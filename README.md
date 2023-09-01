@@ -11,3 +11,4 @@ Zero dependencies outside of the std library.
 ## TODO
 - Read a CSV with any type of delimiter
 - Create tests for different delimiter types, should probably restrict the characters used
+- Rewrite Error handling. All errors will likely come from `std`.

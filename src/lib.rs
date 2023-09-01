@@ -3,6 +3,8 @@ use std::{fs, str, collections::HashMap};
 pub mod errors;
 mod utils;
 
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
 /// *START HERE* - The CSV struct is used to store and manipulate date within memory
 /// before saving/writing to an file on disk.
 /// 
@@ -55,16 +57,16 @@ impl<'a> CSV<'a> {
     /// Create a new CSV instance from an existing CSV file. This method uses
     /// [fs::read_to_string](https://doc.rust-lang.org/std/fs/fn.read_to_string.html)
     /// and appropriately parses in data into a vector of [`Record`]s.
-    pub fn new_from_file(path: &str) -> Result<CSV, errors::Error> {
+    pub fn new_from_file(path: &str) -> Result<CSV> {
         if !path.ends_with(".csv") {
-            return Err(errors::Error::IncorrectFileType);
+            return Err(
+                Box::new(errors::IncorrectFileType {
+                    message: String::from("You must use \".csv\" file!")
+                })
+            );
         }
 
-        let file_attempt = fs::read_to_string(path);
-        let file_data = match file_attempt {
-            Ok(data) => data,
-            Err(_) => return Err(errors::Error::FileRead),
-        };
+        let file_data = fs::read_to_string(path)?;
 
         let data = utils::raw_csv_to_records(&file_data)?;
 
@@ -83,7 +85,7 @@ impl<'a> CSV<'a> {
     }
 
 
-    pub fn get_last_record(&self) -> Result<&Record, errors::Error> {
+    pub fn get_last_record(&self) -> Result<&Record> {
         let last_line = &self.data[&self.data.len() - 1];
         if last_line.is_empty() {
             return Err(errors::Error::DataNotFound);
@@ -92,7 +94,7 @@ impl<'a> CSV<'a> {
     }
 
     /// Retreive the first line of the CSV instance. 
-    pub fn get_headers(&self) -> Result<HashMap<usize, &String>, errors::Error> {
+    pub fn get_headers(&self) -> Result<HashMap<usize, &String>> {
         let first_line = &self.data[0];
         if first_line.is_empty() {
             return Err(errors::Error::DataNotFound);
@@ -137,7 +139,7 @@ impl<'a> CSV<'a> {
 
     /// Create or overwrite an existing CSV file with the data
     /// attached to the CSV instance.
-    pub fn save(&mut self) -> Result<(), errors::Error> {
+    pub fn save(&mut self) -> Result<()> {
         let temp_data = utils::records_to_string(&self.data, ',');
 
         if fs::write(self.path, temp_data).is_err() {
@@ -151,7 +153,7 @@ impl<'a> CSV<'a> {
 
     /// Create or overwrite an existing CSV file with the data.
     /// This method accepts a custom delimiter for your CSV
-    pub fn save_custom(&mut self, c: char) -> Result<(), errors::Error> {
+    pub fn save_custom(&mut self, c: char) -> Result<()> {
         let temp_data = utils::records_to_string(&self.data, c);
 
         if fs::write(self.path, temp_data).is_err() {
