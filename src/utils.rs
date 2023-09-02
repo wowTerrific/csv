@@ -1,8 +1,12 @@
-use super::{Record, errors};
+use super::{Record, errors, Result};
 
-pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>, errors::Error> {
+pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
     if !raw.contains(',') || !raw.contains('\n') {
-        return Err(errors::Error::UnableToParse);
+        return Err(
+            Box::new(errors::ParseError {
+                message: String::from("Unable to parse CSV, please check file"),
+            })
+        );
     }
 
     let mut data: Vec<Record> = Vec::new();

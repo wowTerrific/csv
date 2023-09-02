@@ -88,7 +88,11 @@ impl<'a> CSV<'a> {
     pub fn get_last_record(&self) -> Result<&Record> {
         let last_line = &self.data[&self.data.len() - 1];
         if last_line.is_empty() {
-            return Err(errors::Error::DataNotFound);
+            return Err(
+                Box::new(errors::DataNotFound {
+                    message: String::from("No data for last record")
+                })
+            );
         }
         Ok(last_line)
     }
@@ -97,7 +101,11 @@ impl<'a> CSV<'a> {
     pub fn get_headers(&self) -> Result<HashMap<usize, &String>> {
         let first_line = &self.data[0];
         if first_line.is_empty() {
-            return Err(errors::Error::DataNotFound);
+            return Err(
+                Box::new(errors::DataNotFound {
+                    message: String::from("No data for headers")
+                })
+            );
         }
         let mut map: HashMap<usize, &String> = HashMap::new();
         for (i, v) in first_line.iter().enumerate() {
@@ -142,27 +150,22 @@ impl<'a> CSV<'a> {
     pub fn save(&mut self) -> Result<()> {
         let temp_data = utils::records_to_string(&self.data, ',');
 
-        if fs::write(self.path, temp_data).is_err() {
-            return Err(errors::Error::Write);
-        }
+        fs::write(self.path, temp_data)?;
 
         self.state = SaveState::Saved;
-        Ok(())
-        
+        Ok(())   
     }
+
 
     /// Create or overwrite an existing CSV file with the data.
     /// This method accepts a custom delimiter for your CSV
     pub fn save_custom(&mut self, c: char) -> Result<()> {
         let temp_data = utils::records_to_string(&self.data, c);
 
-        if fs::write(self.path, temp_data).is_err() {
-            return Err(errors::Error::Write);
-        }
+        fs::write(self.path, temp_data)?;
 
         self.state = SaveState::Saved;
         Ok(())
-        
     }
 
 }
