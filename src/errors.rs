@@ -1,18 +1,5 @@
 use std::fmt;
 
-// #[derive(Debug)]
-// pub enum Error {
-//     UnableToParse,
-//     FileNotFound,
-//     FileRead,
-//     CreateFile,
-//     Write,
-//     Append,
-//     DataNotFound,
-//     IncorrectFileType,
-// }
-
-
 #[derive(Debug, Clone)]
 pub struct IncorrectFileType {
     pub message: String,
