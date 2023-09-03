@@ -12,5 +12,5 @@ This library can only pars CSV's with a `,` delimiter. However, it can save CSV'
 Zero dependencies outside of the std library.
 
 ## TODO
-- Read a CSV with any type of delimiter
+- Read a CSV with any type of delimiter `utils::raw_csv_to_records`
 - Create tests for different delimiter types, should probably restrict the characters used

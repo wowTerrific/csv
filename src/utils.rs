@@ -11,6 +11,8 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
 
     let mut data: Vec<Record> = Vec::new();
 
+    // TODO: Check first line for 'sep=<char>' and use
+    // that as the split!
     for line in raw.lines() {
         let record: Record = line.split(',')
                                 .map(|item| item.to_string())

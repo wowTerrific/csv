@@ -3,6 +3,8 @@ use std::{fs, str, collections::HashMap};
 pub mod errors;
 mod utils;
 
+/// This is an alias for the `std::result::Result<T, E>` type.
+/// Nothing speical to see here.
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 /// *START HERE* - The CSV struct is used to store and manipulate date within memory
@@ -57,6 +59,7 @@ impl<'a> CSV<'a> {
     /// Create a new CSV instance from an existing CSV file. This method uses
     /// [fs::read_to_string](https://doc.rust-lang.org/std/fs/fn.read_to_string.html)
     /// and appropriately parses in data into a vector of [`Record`]s.
+    /// *In it's current state, it cannot read CSV's without a comma delimiter!*
     pub fn new_from_file(path: &str) -> Result<CSV> {
         if !path.ends_with(".csv") {
             return Err(

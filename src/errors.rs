@@ -23,6 +23,7 @@ impl std::error::Error for IncorrectFileType {
     }
 }
 
+
 #[derive(Debug, Clone)]
 pub struct DataNotFound {
     pub message: String,
