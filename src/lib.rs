@@ -100,8 +100,10 @@ impl<'a> CSV<'a> {
         Ok(last_line)
     }
 
-    /// Retreive the first line of the CSV instance. 
-    pub fn get_headers(&self) -> Result<HashMap<usize, &String>> {
+    /// Retreive the first line of the CSV instance as a `HashMap`
+    /// with the Key as the name of the header and the value as the
+    /// index of the location in the `Record` vectors.
+    pub fn get_headers(&self) -> Result<HashMap<&String, usize>> {
         let first_line = &self.data[0];
         if first_line.is_empty() {
             return Err(
@@ -110,9 +112,9 @@ impl<'a> CSV<'a> {
                 })
             );
         }
-        let mut map: HashMap<usize, &String> = HashMap::new();
+        let mut map: HashMap<&String, usize> = HashMap::new();
         for (i, v) in first_line.iter().enumerate() {
-            map.insert(i, v);
+            map.insert(v, i);
         }
         Ok(map)
     }
@@ -245,9 +247,9 @@ mod tests {
         let csv = CSV::new_with_data("test.csv", data);
 
         if let Ok(header_data) = csv.get_headers() {
-            assert_eq!(header_data.get(&0), Some(&&"Header 1".to_string()));
-            assert_eq!(header_data.get(&1), Some(&&"Header 2".to_string()));
-            assert_eq!(header_data.get(&2), Some(&&"Header 3".to_string()));
+            assert_eq!(header_data.get(&"Header 1".to_string()), Some(&0));
+            assert_eq!(header_data.get(&"Header 2".to_string()), Some(&1));
+            assert_eq!(header_data.get(&"Header 3".to_string()), Some(&2));
         } else {
             assert!(false, "failed to get header data");
         }
