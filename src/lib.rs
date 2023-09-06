@@ -102,8 +102,10 @@ impl<'a> CSV<'a> {
 
     /// Retreive the first line of the CSV instance as a `HashMap`
     /// with the Key as the name of the header and the value as the
-    /// index of the location in the `Record` vectors.
-    pub fn get_headers(&self) -> Result<HashMap<&String, usize>> {
+    /// index of the location in the `Record` vectors. This creates
+    /// an "owned" HashMap. This way manipulation to the headers is
+    /// easily accessible if needed.
+    pub fn get_headers(&self) -> Result<HashMap<String, usize>> {
         let first_line = &self.data[0];
         if first_line.is_empty() {
             return Err(
@@ -112,10 +114,12 @@ impl<'a> CSV<'a> {
                 })
             );
         }
-        let mut map: HashMap<&String, usize> = HashMap::new();
+
+        let mut map: HashMap<String, usize> = HashMap::new();
         for (i, v) in first_line.iter().enumerate() {
-            map.insert(v, i);
+            map.insert(v.to_owned(), i);
         }
+        
         Ok(map)
     }
 
