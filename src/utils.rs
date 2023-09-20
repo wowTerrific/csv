@@ -15,22 +15,44 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
 
     // TODO: Check first line for 'sep=<char>' and use
     // that as the split!
+
+
+    // NEED TO ADD LINE-STATE as boolean to accomade
+    // the use of newline characters within freaking
+    // quotations dude. - 
+    // maybe add a check to see if the number of '"' characters is odd to
+    // do a 'manual' append instead of `parse_string_to_record`
+    let mut in_quotes_state = false;
     for line in raw.lines() {
 
-        // TODO:
-        // find "", make sure that is stays as a string...
-        // if line starts with ", append remaining line to last record in data...
-        // let record = parse_string_to_record(line);
+        let append_record = parse_string_to_record(line);
 
-        let record: Record = line.split(',')
-                                .map(|item| item.to_string())
-                                .collect();
+        if line.matches("\"").count() % 2 != 0 {
+            if in_quotes_state && data.len() > 0 {
+                let working_record_index = data.len() - 1;
+                let working_record = &mut data[working_record_index];
+
+
+
+                /****** HERE IS WHERE I STOPPED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! *********************************************************/
+                // add append_record to working_record
+                let rest_of_the_line = &append_record[0];
+                dbg!(&rest_of_the_line);
+
+                continue; // next line please
+            }
+            in_quotes_state = !in_quotes_state;
+        } 
+
+       data.push(append_record);        
         
-        data.push(record);
     }
     Ok(data)
 }
 
+
+// TODO: add method to check for ',' in record fields, if so, 
+// surround that field with quotation marks
 pub fn records_to_string(records: &Vec<Record>, c: char) -> String {
     let mut combined_records: Vec<String> = Vec::new();
     if c != ',' {
@@ -64,7 +86,7 @@ pub fn path_validate(path: &str) {
     }
 }
 
-
+// TODO: delimeter should be variable instead of a hard-coded ','
 fn parse_string_to_record(raw_string: &str) -> Record {
     let mut record: Record = Vec::new();
     let mut in_quotes = false;
