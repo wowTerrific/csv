@@ -12,6 +12,7 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
     }
 
     let mut data: Vec<Record> = Vec::new();
+    dbg!(&raw);
 
     // TODO: Check first line for 'sep=<char>' and use
     // that as the split!
@@ -23,7 +24,7 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
     // maybe add a check to see if the number of '"' characters is odd to
     // do a 'manual' append instead of `parse_string_to_record`
     let mut in_quotes_state = false;
-    for line in raw.lines() {
+    for line in raw.lines() {               // FIX THIS SHIT
 
         let append_record = parse_string_to_record(line);
 
@@ -35,9 +36,11 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
 
 
                 /****** HERE IS WHERE I STOPPED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! *********************************************************/
+                /******** IMPORTANT NOTE - DON'T USE THE RAW.LINES() METHOD. CREATE A HELPER FUNCTION TO PARSE INTO LINES THEN
+                 * PARSE THE INDIVIDUAL LINES INTO RECORDS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                 */
                 // add append_record to working_record
                 let rest_of_the_line = &append_record[0];
-                dbg!(&rest_of_the_line);
 
                 continue; // next line please
             }
