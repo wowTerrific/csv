@@ -83,9 +83,7 @@ fn parse_string_to_vec_ignore_quotes(raw_string: &str, delimeter: char, result_a
         current.push(c);
     }
 
-    if current.len() > 0 {
-        return_vec.push(current);
-    }
+    return_vec.push(current);
 
     return_vec
 }
@@ -175,12 +173,13 @@ mod utils_tests {
     #[test]
     fn create_records_with_empty_strings_to_vec() {
         let expected: Vec<String> = vec![
+            String::from(""),
             String::from("s,e,v\ne,n"),
             String::from(""),
             String::from("nine"),
         ];
 
-        let raw_data = String::from("\"s,e,v\ne,n\",,nine");
+        let raw_data = String::from(",\"s,e,v\ne,n\",,nine");
         let result = parse_string_to_vec_ignore_quotes(&raw_data, ',', true);
         assert_eq!(expected, result);
     }
