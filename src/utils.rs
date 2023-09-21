@@ -2,6 +2,8 @@ use super::{Record, errors, Result};
 
 
 // TODO: make sure anything within "" is contained within a field...
+/// In it's curernt form, this will remove all `\r` characters. as
+/// new csv lines are denoted by the `\n` character.
 pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
     if !raw.contains(',') || !raw.contains('\n') {
         return Err(
@@ -10,46 +12,17 @@ pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
             })
         );
     }
-
-    let mut data: Vec<Record> = Vec::new();
-    dbg!(&raw);
-
     // TODO: Check first line for 'sep=<char>' and use
-    // that as the split!
+    // that as the second delimeter!
 
+    let lines: Vec<String> = parse_string_to_vec_ignore_quotes(raw, '\n', false);
+    let mut data: Vec<Record> = Vec::new();
 
-    // NEED TO ADD LINE-STATE as boolean to accomade
-    // the use of newline characters within freaking
-    // quotations dude. - 
-    // maybe add a check to see if the number of '"' characters is odd to
-    // do a 'manual' append instead of `parse_string_to_record`
-    let mut in_quotes_state = false;
-    for line in raw.lines() {               // FIX THIS SHIT
-
-        let append_record = parse_string_to_record(line);
-
-        if line.matches("\"").count() % 2 != 0 {
-            if in_quotes_state && data.len() > 0 {
-                let working_record_index = data.len() - 1;
-                let working_record = &mut data[working_record_index];
-
-
-
-                /****** HERE IS WHERE I STOPPED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! *********************************************************/
-                /******** IMPORTANT NOTE - DON'T USE THE RAW.LINES() METHOD. CREATE A HELPER FUNCTION TO PARSE INTO LINES THEN
-                 * PARSE THE INDIVIDUAL LINES INTO RECORDS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                 */
-                // add append_record to working_record
-                let rest_of_the_line = &append_record[0];
-
-                continue; // next line please
-            }
-            in_quotes_state = !in_quotes_state;
-        } 
-
-       data.push(append_record);        
-        
+    for line in lines {
+        let record = parse_string_to_vec_ignore_quotes(&line, ',', true);
+        data.push(record);
     }
+
     Ok(data)
 }
 
@@ -89,32 +62,34 @@ pub fn path_validate(path: &str) {
     }
 }
 
-// TODO: delimeter should be variable instead of a hard-coded ','
-fn parse_string_to_record(raw_string: &str) -> Record {
-    let mut record: Record = Vec::new();
+/// Private function but important to know that this will remove `\r` characters.
+fn parse_string_to_vec_ignore_quotes(raw_string: &str, delimeter: char, result_as_record: bool) -> Vec<String> {
+    let mut return_vec = Vec::new();
     let mut in_quotes = false;
     let mut current = String::new();
 
     for c in raw_string.chars() {
         if c == '"' {
             in_quotes = !in_quotes;
-            continue;
-        } else if c == ',' && !in_quotes {
-            if current.len() > 0 {
-                record.push(current);
-                current = String::new();
+            if result_as_record {
                 continue;
             }
+        } else if c == delimeter && !in_quotes {
+            return_vec.push(current);
+            current = String::new();
+            continue;
+        } else if c == '\r' {
+            continue;
         }
 
         current.push(c);
     }
 
     if current.len() > 0 {
-        record.push(current);
+        return_vec.push(current);
     }
 
-    record
+    return_vec
 }
 
 
@@ -122,18 +97,6 @@ fn parse_string_to_record(raw_string: &str) -> Record {
 mod utils_tests {
     use crate::Record;
     use super::*;
-
-    #[test]
-    fn test_parse_string_to_record() {
-        let ut = "\"one,one,one\",two,three";
-        let expected: Record = vec![
-            String::from("one,one,one"), 
-            String::from("two"), 
-            String::from("three")
-        ];
-
-        assert_eq!(expected, parse_string_to_record(ut));
-    }
 
     #[test]
     fn utils_records_to_string() {
@@ -182,6 +145,45 @@ mod utils_tests {
 
         let csv_string = String::from("\"one,one,one\",two,three\nfour,\"fi\nve\",six\n\"s,e,v\ne,n\",eight,nine");
         let result = raw_csv_to_records(&csv_string).expect("failed to parse quotes and newlines into to CSV");
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn create_lines_with_string_to_vec_ignore_quotes() {
+        let expected: Vec<String> = vec![
+            String::from("\"one,one,one\",two,three"),
+            String::from("four,\"fi\nve\",six"),
+            String::from("\"s,e,v\ne,n\",eight,nine"),
+        ];
+
+        let raw_data = String::from("\"one,one,one\",two,three\nfour,\"fi\nve\",six\n\"s,e,v\ne,n\",eight,nine");
+        let result = parse_string_to_vec_ignore_quotes(&raw_data, '\n', false);
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn create_records_with_string_to_vec_ignore_quotes() {
+        let expected: Vec<String> = vec![
+            String::from("s,e,v\ne,n"),
+            String::from("eight"),
+            String::from("nine"),
+        ];
+
+        let raw_data = String::from("\"s,e,v\ne,n\",eight,nine");
+        let result = parse_string_to_vec_ignore_quotes(&raw_data, ',', true);
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn create_records_with_empty_strings_to_vec() {
+        let expected: Vec<String> = vec![
+            String::from("s,e,v\ne,n"),
+            String::from(""),
+            String::from("nine"),
+        ];
+
+        let raw_data = String::from("\"s,e,v\ne,n\",,nine");
+        let result = parse_string_to_vec_ignore_quotes(&raw_data, ',', true);
         assert_eq!(expected, result);
     }
 }

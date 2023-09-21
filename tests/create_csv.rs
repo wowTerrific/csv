@@ -20,6 +20,23 @@ fn create_csv_instance_from_file() {
 }
 
 #[test]
+fn create_csv_instance_with_quotes_from_file() {
+    let csv = CSV::new_from_file("./tests/test_data/instance_with_quotes.csv")
+        .unwrap_or_else(|e| {
+            panic!("{:?}: Check the test_data folder for instance_with_quotes.csv!", e);
+        });
+
+    let expected_data: Vec<Record> = vec![
+        vec!["header 1".to_string(), "header 2".to_string(), "header 3".to_string()],
+        vec!["value 1".to_string(), "value 2".to_string(), "value 3, with, commas".to_string()],
+        vec!["value 4\n".to_string(), "value 5".to_string(), "value 6".to_string()],
+    ];
+
+    assert_eq!(expected_data, csv.data);
+    assert_eq!("./tests/test_data/instance_with_quotes.csv", csv.path);
+}
+
+#[test]
 fn create_edit_csv_file_from_instance() {
     setup::remove_extra_csvs();
 
