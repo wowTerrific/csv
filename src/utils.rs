@@ -1,7 +1,5 @@
 use super::{Record, errors, Result};
 
-
-// TODO: make sure anything within "" is contained within a field...
 /// In it's curernt form, this will remove all `\r` characters. as
 /// new csv lines are denoted by the `\n` character.
 pub fn raw_csv_to_records(raw: &str) -> Result<Vec<Record>> {
